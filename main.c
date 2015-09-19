@@ -114,6 +114,7 @@ update_history(struct packet_info* p)
 		return;
 
 	hist.signal[hist.index] = p->phy_signal;
+	hist.noise[hist.index] = p->phy_noise;
 	hist.rate[hist.index] = p->phy_rate;
 	hist.type[hist.index] = (p->phy_flags & PHY_FLAG_BADFCS) ? 1 : p->wlan_type;
 	hist.retry[hist.index] = p->wlan_retry;
@@ -164,6 +165,7 @@ update_spectrum(struct packet_info* p, struct node_info* n)
 
 	chan = &spectrum[p->pkt_chan_idx];
 	chan->signal = p->phy_signal;
+	chan->noise = p->phy_noise;
 	chan->packets++;
 	chan->bytes += p->wlan_len;
 	chan->durations += p->pkt_duration;
@@ -230,8 +232,9 @@ write_to_file(struct packet_info* p)
 		get_packet_type_name(p->wlan_type), ether_sprintf(p->wlan_src));
 	fprintf(DF, "%s, ", ether_sprintf(p->wlan_dst));
 	fprintf(DF, "%s, ", ether_sprintf(p->wlan_bssid));
-	fprintf(DF, "%x, %d, %d, %d, %d, ",
-		p->pkt_types, p->phy_signal, p->wlan_len, p->phy_rate, p->phy_freq);
+	fprintf(DF, "%x, %d, %d, %d, %d, %d, %d, ",
+		p->pkt_types, p->phy_signal, p->phy_noise, p->phy_snr,
+		p->wlan_len, p->phy_rate, p->phy_freq);
 	fprintf(DF, "%016llx, ", (unsigned long long)p->wlan_tsf);
 	fprintf(DF, "%s, %d, %d, %d, %d, %d, ",
 		p->wlan_essid, p->wlan_mode, p->wlan_channel,
@@ -306,6 +309,10 @@ fixup_packet_channel(struct packet_info* p) {
 	 * otherwise we set it from the physical channel */
 	if (p->wlan_channel == 0 && p->pkt_chan_idx >= 0)
 		p->wlan_channel = channel_get_chan_from_idx(p->pkt_chan_idx);
+
+	/* detect if noise reading is present or not */
+	if (!conf.have_noise && p->phy_noise)
+		conf.have_noise = 1;
 
 	/* if current channel is unknown (this is a mac80211 bug), guess it from
 	 * the packet */

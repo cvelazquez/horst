@@ -89,12 +89,19 @@ copy_nodeinfo(struct node_info* n, struct packet_info* p)
 		n->wlan_channel = p->wlan_channel;
 	}
 
+	ewma_add(&n->phy_snr_avg, p->phy_snr);
 	ewma_add(&n->phy_sig_avg, -p->phy_signal);
 	n->phy_sig_sum += -p->phy_signal;
 	n->phy_sig_count += 1;
 
+	if (p->phy_snr > n->phy_snr_max)
+		n->phy_snr_max = p->phy_snr;
 	if (p->phy_signal > n->phy_sig_max || n->phy_sig_max == 0)
 		n->phy_sig_max = p->phy_signal;
+	if ((n->phy_snr_min == 0 && p->phy_snr > 0) || p->phy_snr < n->phy_snr_min)
+		n->phy_snr_min = p->phy_snr;
+	if (p->wlan_channel != 0)
+		n->wlan_channel = p->wlan_channel;
 
 	if ((p->wlan_type == WLAN_FRAME_DATA) ||
 	    (p->wlan_type == WLAN_FRAME_QDATA) ||
@@ -147,6 +154,7 @@ node_update(struct packet_info* p)
 		n = malloc(sizeof(struct node_info));
 		memset(n, 0, sizeof(struct node_info));
 		n->essid = NULL;
+		ewma_init(&n->phy_snr_avg, 1024, 8);
 		ewma_init(&n->phy_sig_avg, 1024, 8);
 		list_head_init(&n->on_channels);
 		list_add_tail(&nodes, &n->list);

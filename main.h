@@ -116,6 +116,8 @@ struct packet_info {
 
 	/* wlan phy (from radiotap) */
 	int			phy_signal;	/* signal strength (usually dBm) */
+	int			phy_noise;	/* noise level (usually dBm) */
+	unsigned int		phy_snr;	/* signal to noise ratio */
 	unsigned int		phy_rate;	/* physical rate * 10 (=in 100kbps) */
 	unsigned char		phy_rate_idx;	/* MCS index */
 	unsigned char		phy_rate_flags;	/* MCS flags */
@@ -177,6 +179,9 @@ struct node_info {
 	unsigned int		pkt_count;	/* nr of packets seen */
 
 	/* wlan phy (from radiotap) */
+	unsigned int		phy_snr_min;
+	unsigned int		phy_snr_max;
+	struct ewma		phy_snr_avg;
 	int			phy_sig_max;
 	struct ewma		phy_sig_avg;
 	unsigned long		phy_sig_sum;
@@ -230,6 +235,7 @@ extern struct essid_meta_info essids;
 
 struct history {
 	int			signal[MAX_HISTORY];
+	int			noise[MAX_HISTORY];
 	int			rate[MAX_HISTORY];
 	unsigned int		type[MAX_HISTORY];
 	unsigned int		retry[MAX_HISTORY];
@@ -262,6 +268,7 @@ extern struct statistics stats;
 struct channel_info {
 	int			signal;
 	struct ewma		signal_avg;
+	int			noise;
 	unsigned long		packets;
 	unsigned long		bytes;
 	unsigned long		durations;
@@ -327,6 +334,7 @@ struct config {
 				do_macfilter:1,
 				display_initialized:1,
 				channel_initialized:1;
+				have_noise:1,
 	int			arphrd; // the device ARP type
 	unsigned char		my_mac_addr[MAC_LEN];
 	int			paused;
