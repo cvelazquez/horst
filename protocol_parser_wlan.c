@@ -85,7 +85,7 @@ parse_prism_header(unsigned char** buf, int len, struct packet_info* p)
 		/* broadcom hack */
 		p->phy_signal = ph->rssi.data;
 		p->phy_noise = -95;
-		p->phy_snr = 95 + ph->rssi.data;
+		p->phy_snr = ph->noise.data;
 	}
 	else {
 		/* assume hostap */
