@@ -750,7 +750,7 @@ dumpfile_open(const char* name)
 		err(1, "Couldn't open dump file");
 
 	fprintf(DF, "TIME, WLAN TYPE, MAC SRC, MAC DST, BSSID, PACKET TYPES, SIGNAL, ");
-	fprintf(DF, "LENGTH, PHY RATE, FREQUENCY, TSF, ESSID, MODE, CHANNEL, ");
+	fprintf(DF, "NOISE, SNR, LENGTH, PHY RATE, FREQUENCY, TSF, ESSID, MODE, CHANNEL, ");
 	fprintf(DF, "WEP, WPA1, RSN (WPA2), IP SRC, IP DST\n");
 
 	printlog("- Writing to outfile %s", conf.dumpfile);
