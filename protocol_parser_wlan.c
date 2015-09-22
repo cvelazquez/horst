@@ -79,19 +79,19 @@ parse_prism_header(unsigned char** buf, int len, struct packet_info* p)
 		/* new madwifi */
 		p->phy_signal = ph->signal.data;
 		p->phy_noise = ph->noise.data;
-		p->phy_snr = ph->rssi.data;
+		p->phy_snr = 1;
 	}
 	else if (((int)ph->rssi.data) < 0) {
 		/* broadcom hack */
 		p->phy_signal = ph->rssi.data;
 		p->phy_noise = -95;
-		p->phy_snr = ph->noise.data;
+		p->phy_snr = 2;
 	}
 	else {
 		/* assume hostap */
 		p->phy_signal = ph->signal.data;
 		p->phy_noise = ph->noise.data;
-		p->phy_snr = ph->signal.data - ph->noise.data; //XXX rssi?
+		p->phy_snr = 3; //XXX rssi?
 	}
 
 	p->phy_rate = ph->rate.data * 10;
